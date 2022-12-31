@@ -103,3 +103,5 @@ TARGET_PROBE_WEAK_NOP(rp_probe)
 TARGET_PROBE_WEAK_NOP(renesas_probe)
 TARGET_PROBE_WEAK_NOP(mm32l0xx_probe)
 TARGET_PROBE_WEAK_NOP(mm32f3xx_probe)
+
+TARGET_PROBE_WEAK_NOP(atxmega_probe)
