@@ -406,7 +406,7 @@ static bool avr_ensure_nvm_idle(const avr_pdi_s *const pdi)
 
 static bool avr_attach(target_s *const target)
 {
-	const avr_pdi_s *const pdi = target->priv;
+	const avr_pdi_s *const pdi = avr_pdi_struct(target);
 	volatile exception_s e;
 	/* Put the target back in PDI comms mode */
 	jtag_dev_write_ir(pdi->dev_index, IR_PDI);
@@ -431,7 +431,7 @@ static bool avr_attach(target_s *const target)
 
 static void avr_detach(target_s *const target)
 {
-	const avr_pdi_s *const pdi = target->priv;
+	const avr_pdi_s *const pdi = avr_pdi_struct(target);
 
 	/* Disable all enabled PDI controller units to detach from the target */
 	avr_disable(pdi, PDI_NVM);
@@ -441,7 +441,7 @@ static void avr_detach(target_s *const target)
 
 static void avr_reset(target_s *const target)
 {
-	avr_pdi_s *const pdi = target->priv;
+	avr_pdi_s *const pdi = avr_pdi_struct(target);
 	/*
 	 * We only actually want to do this if the target is not presently attached as
 	 * this resets the NVM and debug enables
@@ -460,7 +460,7 @@ static void avr_reset(target_s *const target)
 
 static void avr_halt_request(target_s *const target)
 {
-	avr_pdi_s *const pdi = target->priv;
+	avr_pdi_s *const pdi = avr_pdi_struct(target);
 	/*
 	 * To halt the processor we go through a few really specific steps:
 	 * Write r4 to 1 to indicate we want to put the processor into debug-based pause
@@ -479,7 +479,7 @@ static void avr_halt_request(target_s *const target)
 
 static target_halt_reason_e avr_halt_poll(target_s *const target, target_addr_t *const watch)
 {
-	avr_pdi_s *const pdi = target->priv;
+	avr_pdi_s *const pdi = avr_pdi_struct(target);
 	(void)watch;
 
 	/* If we're running but the processor stops because it's hit a breakpoint, update */
