@@ -78,6 +78,7 @@ typedef enum {
 	PNR_SERIES_RA4M2 = PNR_SERIES('A', '4', 'M', '2'),
 	PNR_SERIES_RA4M3 = PNR_SERIES('A', '4', 'M', '3'),
 	PNR_SERIES_RA4E1 = PNR_SERIES('A', '4', 'E', '1'),
+	PNR_SERIES_RA4E2 = PNR_SERIES('A', '4', 'E', '2'),
 	PNR_SERIES_RA4W1 = PNR_SERIES('A', '4', 'W', '1'),
 	PNR_SERIES_RA6M1 = PNR_SERIES('A', '6', 'M', '1'),
 	PNR_SERIES_RA6M2 = PNR_SERIES('A', '6', 'M', '2'),
@@ -85,9 +86,103 @@ typedef enum {
 	PNR_SERIES_RA6M4 = PNR_SERIES('A', '6', 'M', '4'),
 	PNR_SERIES_RA6M5 = PNR_SERIES('A', '6', 'M', '5'),
 	PNR_SERIES_RA6E1 = PNR_SERIES('A', '6', 'E', '1'),
+	PNR_SERIES_RA6E2 = PNR_SERIES('A', '6', 'E', '2'),
 	PNR_SERIES_RA6T1 = PNR_SERIES('A', '6', 'T', '1'),
 	PNR_SERIES_RA6T2 = PNR_SERIES('A', '6', 'T', '2'),
 } pnr_series_t;
+
+#define       NONE -1
+
+typedef enum {
+	RV40,
+	MF3,
+	MF4,
+} renesas_ra_flash_type_t;
+
+typedef enum {
+	FL1,
+	FL2,
+	FRT
+} renesas_sa_pnr_location;
+
+typedef struct renesas_ra_family_details {
+	uint32_t code_end;
+	uint32_t option_start;
+	uint32_t option_size;
+	uint32_t option_start_2;
+	uint32_t option_size_2;
+	uint32_t data_flash_start;
+	uint32_t data_flash_end;
+	uint32_t factory_flash_start;
+	uint32_t factory_size;
+	uint32_t sramhs_start;
+	uint32_t sramhs_size;
+	uint32_t sram0_start;
+	uint32_t sram0_end;
+	uint32_t stdby_sram_start;
+	uint32_t stdby_sram_end;
+	renesas_ra_flash_type_t flash_type;
+	renesas_sa_pnr_location pnr_location;
+	uint32_t frt_start;
+	uint32_t frt_size;
+} renesas_ra_family_details_s;
+
+typedef struct renesas_ra_family {
+	pnr_series_t series;
+	renesas_ra_family_details_s details;
+} renesas_ra_family_s;
+
+typedef struct renesas_option_setting_range {
+	uint32_t addr;
+} renesas_option_setting_range_s;
+
+typedef struct {
+	pnr_series_t series;
+	uint32_t rw_registers[10]; /* this is ugly hack, but we are not using C99, yet */
+	uint32_t opt_registers[10]; /* same here */
+} renesas_option_setting_s;
+
+renesas_ra_family_s renesas_ra_family[] = {
+	{PNR_SERIES_RA2L1, {0x00040000, 0x01010010,         36,       NONE,       NONE, 0x40100000, 0x40102000,       NONE,       NONE,       NONE,       NONE, 0x20000000, 0x20008000,       NONE,       NONE, MF4,  FL1,       NONE,       NONE}}, 
+	{PNR_SERIES_RA2E1, {0x00020000, 0x01010010,         36,       NONE,       NONE, 0x40100000, 0x40101000,       NONE,       NONE,       NONE,       NONE, 0x20004000, 0x20008000,       NONE,       NONE, MF4,  FL1,       NONE,       NONE}}, 
+	{PNR_SERIES_RA2E2, {0x00010000, 0x01010010,         36,       NONE,       NONE, 0x40100000, 0x40100800,       NONE,       NONE,       NONE,       NONE, 0x20004000, 0x20006000,       NONE,       NONE, MF4,  FL1,       NONE,       NONE}}, 
+	{PNR_SERIES_RA2A1, {0x00040000, 0x01010008,         44,       NONE,       NONE, 0x40100000, 0x40102000,       NONE,       NONE,       NONE,       NONE, 0x20000000, 0x20008000,       NONE,       NONE, MF3,  FRT, 0x407FB19C,          4}}, 
+	{PNR_SERIES_RA4M1, {0x00040000, 0x01010008,         44,       NONE,       NONE, 0x40100000, 0x40102000,       NONE,       NONE,       NONE,       NONE, 0x20000000, 0x20008000,       NONE,       NONE, MF3,  FRT, 0x407FB19C,          4}}, 
+	{PNR_SERIES_RA4M2, {0x00080000, 0x0100A100,        512,       NONE,       NONE, 0x08000000, 0x08002000, 0x010080F0,        196,       NONE,       NONE, 0x20000000, 0x20020000, 0x28000000, 0x28000400, RV40, FL2,       NONE,       NONE}}, 
+	{PNR_SERIES_RA4M3, {0x00100000, 0x0100A100,        512,       NONE,       NONE, 0x08000000, 0x08002000, 0x010080F0,        196,       NONE,       NONE, 0x20000000, 0x20020000, 0x28000000, 0x28000400, RV40, FL2,       NONE,       NONE}}, 
+	{PNR_SERIES_RA4E1, {0x00080000, 0x0100A100,        512,       NONE,       NONE, 0x08000000, 0x08002000, 0x010080F0,        196,       NONE,       NONE, 0x20000000, 0x20020000, 0x28000000, 0x28000400, RV40, FL2,       NONE,       NONE}}, 
+	{PNR_SERIES_RA4E2, {0x00020000, 0x0100A100,        512,       NONE,       NONE, 0x08000000, 0x08001000, 0x010080F0,        196,       NONE,       NONE, 0x20000000, 0x2000A000, 0x28000000, 0x28000400, RV40, FL2,       NONE,       NONE}}, 
+	{PNR_SERIES_RA4W1, {0x00080000, 0x01010008,         44,       NONE,       NONE, 0x40100000, 0x40102000,       NONE,       NONE,       NONE,       NONE, 0x20000000, 0x20018000,       NONE,       NONE, MF3,  FRT, 0x407FB19C,          4}}, 
+	{PNR_SERIES_RA6M1, {0x00080000, 0x01007000,       4096, 0x0100A150,         24, 0x40100000, 0x40102000,       NONE,       NONE, 0x1FFE0000, 0x20000000, 0x20000000, 0x20020000, 0x200FE000, 0x20100000, RV40, FRT, 0x407FB17C,         36}}, 
+	{PNR_SERIES_RA6M2, {0x00100000, 0x01007000,       4096, 0x0100A150,         24, 0x40100000, 0x40108000,       NONE,       NONE, 0x1FFE0000, 0x20000000, 0x20000000, 0x20040000, 0x200FE000, 0x20100000, RV40, FRT, 0x407FB17C,         36}}, 
+	{PNR_SERIES_RA6M4, {0x00280000, 0x0100A100,        512,       NONE,       NONE, 0x08000000, 0x08002000, 0x010080F0,        196,       NONE,       NONE, 0x20000000, 0x20040000, 0x28000000, 0x28000400, RV40, FL2,       NONE,       NONE}}, 
+	{PNR_SERIES_RA6M5, {0x00300000, 0x0100A100,        512,       NONE,       NONE, 0x08000000, 0x08002000, 0x010080F0,        196,       NONE,       NONE, 0x20000000, 0x20080000, 0x28000000, 0x28000400, RV40, FL2,       NONE,       NONE}}, 
+	{PNR_SERIES_RA6E1, {0x00280000, 0x0100A100,        512,       NONE,       NONE, 0x08000000, 0x08002000, 0x010080F0,        196,       NONE,       NONE, 0x20000000, 0x20040000, 0x28000000, 0x28000400, RV40, FL2,       NONE,       NONE}}, 
+	{PNR_SERIES_RA6E2, {0x00040000, 0x0100A100,        512,       NONE,       NONE, 0x08000000, 0x08001000, 0x010080F0,        196,       NONE,       NONE, 0x20000000, 0x2000A000, 0x28000000, 0x28000400, RV40, FL2,       NONE,       NONE}}, 
+	{PNR_SERIES_RA6T1, {0x00080000, 0x01007000,       4096, 0x0100A150,         24, 0x40100000, 0x40102000,       NONE,       NONE, 0x1FFE0000, 0x1FFF0000,       NONE,       NONE,       NONE,       NONE, RV40, FRT, 0x407FB17C,         36}}, 
+	{PNR_SERIES_RA6T2, {0x00080000, 0x0100A100,        512,       NONE,       NONE, 0x08000000, 0x08004000, 0x010080F0,        196,       NONE,       NONE, 0x20000000, 0x20010000, 0x28000000, 0x28000400, RV40, FL2,       NONE,       NONE}}, 
+};
+
+renesas_option_setting_s renesas_option_setting[] = {
+	{PNR_SERIES_RA2L1, {}},
+	{PNR_SERIES_RA2E1, {}},
+	{PNR_SERIES_RA2E2, {}},
+	{PNR_SERIES_RA2A1, {}},
+	{PNR_SERIES_RA4M1, {}},
+	{PNR_SERIES_RA4M2, {0x0100A100U, 0x0100A130U, 0x0100A180U, 0x0100A200U, 0x0100A280U, 0x0100A2C0U}, {0x0100A1C0U, 0x0100A1E0U, 0x0100A240U, 0x0100A260U}},
+	{PNR_SERIES_RA4M3, {}}, 
+	{PNR_SERIES_RA4E1, {}}, 
+	{PNR_SERIES_RA4E2, {}},
+	{PNR_SERIES_RA4W1, {}},
+	{PNR_SERIES_RA6M1, {}},
+	{PNR_SERIES_RA6M2, {}},
+	{PNR_SERIES_RA6M4, {}},
+	{PNR_SERIES_RA6M5, {}},
+	{PNR_SERIES_RA6E1, {}},
+	{PNR_SERIES_RA6E2, {}},
+	{PNR_SERIES_RA6T1, {}},
+	{PNR_SERIES_RA6T2, {}},
+};
 
 /* Code flash memory size */
 #define PNR_MEMSIZE_INDEX 8
@@ -518,8 +613,8 @@ static bool renesas_rv40_flash_erase(target_flash_s *f, target_addr_t addr, size
 	const bool code_flash = addr < RENESAS_CF_END;
 
 	/* Erasing Option-Setting flash memory is not allowed, only write is supported */
-	if (RENESAS_OF_START <= addr && addr <= (RENESAS_OF_START + RENESAS_OF_SIZE))
-		return true;
+	// if (RENESAS_OF_START <= addr && addr <= (RENESAS_OF_START + RENESAS_OF_SIZE))
+	// 	return true;
 
 	/* Set Erasure Priority Mode */
 	target_mem_write16(t, RV40_FCPSR, RV40_FCPSR_ESUSPMD);
