@@ -91,7 +91,7 @@ typedef enum {
 	PNR_SERIES_RA6T2 = PNR_SERIES('A', '6', 'T', '2'),
 } pnr_series_t;
 
-#define       NONE -1
+#define NONE 0xFFFFFFFF
 
 typedef enum {
 	RV40,
@@ -116,9 +116,11 @@ typedef struct renesas_ra_family_details {
 	uint32_t factory_flash_start;
 	uint32_t factory_size;
 	uint32_t sramhs_start;
-	uint32_t sramhs_size;
+	uint32_t sramhs_end;
 	uint32_t sram0_start;
 	uint32_t sram0_end;
+	uint32_t sram1_start;
+	uint32_t sram1_end;
 	uint32_t stdby_sram_start;
 	uint32_t stdby_sram_end;
 	renesas_ra_flash_type_t flash_type;
@@ -134,12 +136,13 @@ typedef struct renesas_ra_family {
 
 typedef struct renesas_option_setting_range {
 	uint32_t addr;
+	uint8_t size;
 } renesas_option_setting_range_s;
 
 typedef struct {
 	pnr_series_t series;
-	uint32_t rw_registers[10]; /* this is ugly hack, but we are not using C99, yet */
-	uint32_t opt_registers[10]; /* same here */
+	renesas_option_setting_range_s rw_registers[9];  /* 9 is maximum registers across all RA MCU series, this is ugly hack, but we are not using C99 */
+	renesas_option_setting_range_s opt_registers[5]; /* 5 is maximum registers across all RA MCU series */
 } renesas_option_setting_s;
 
 renesas_ra_family_s renesas_ra_family[] = {
@@ -155,6 +158,7 @@ renesas_ra_family_s renesas_ra_family[] = {
 	{PNR_SERIES_RA4W1, {0x00080000, 0x01010008,         44,       NONE,       NONE, 0x40100000, 0x40102000,       NONE,       NONE,       NONE,       NONE, 0x20000000, 0x20018000,       NONE,       NONE, MF3,  FRT, 0x407FB19C,          4}}, 
 	{PNR_SERIES_RA6M1, {0x00080000, 0x01007000,       4096, 0x0100A150,         24, 0x40100000, 0x40102000,       NONE,       NONE, 0x1FFE0000, 0x20000000, 0x20000000, 0x20020000, 0x200FE000, 0x20100000, RV40, FRT, 0x407FB17C,         36}}, 
 	{PNR_SERIES_RA6M2, {0x00100000, 0x01007000,       4096, 0x0100A150,         24, 0x40100000, 0x40108000,       NONE,       NONE, 0x1FFE0000, 0x20000000, 0x20000000, 0x20040000, 0x200FE000, 0x20100000, RV40, FRT, 0x407FB17C,         36}}, 
+	{PNR_SERIES_RA6M3, {0x00200000, 0x01007000,       4096, 0x0100A150,         24, 0x40100000, 0x40110000,       NONE,       NONE, 0x1FFE0000, 0x20000000, 0x20000000, 0x20040000, 0x200FE000, 0x20100000, RV40, FRT, 0x407FB17C,         36}}, 
 	{PNR_SERIES_RA6M4, {0x00280000, 0x0100A100,        512,       NONE,       NONE, 0x08000000, 0x08002000, 0x010080F0,        196,       NONE,       NONE, 0x20000000, 0x20040000, 0x28000000, 0x28000400, RV40, FL2,       NONE,       NONE}}, 
 	{PNR_SERIES_RA6M5, {0x00300000, 0x0100A100,        512,       NONE,       NONE, 0x08000000, 0x08002000, 0x010080F0,        196,       NONE,       NONE, 0x20000000, 0x20080000, 0x28000000, 0x28000400, RV40, FL2,       NONE,       NONE}}, 
 	{PNR_SERIES_RA6E1, {0x00280000, 0x0100A100,        512,       NONE,       NONE, 0x08000000, 0x08002000, 0x010080F0,        196,       NONE,       NONE, 0x20000000, 0x20040000, 0x28000000, 0x28000400, RV40, FL2,       NONE,       NONE}}, 
@@ -164,24 +168,25 @@ renesas_ra_family_s renesas_ra_family[] = {
 };
 
 renesas_option_setting_s renesas_option_setting[] = {
-	{PNR_SERIES_RA2L1, {}},
-	{PNR_SERIES_RA2E1, {}},
-	{PNR_SERIES_RA2E2, {}},
-	{PNR_SERIES_RA2A1, {}},
-	{PNR_SERIES_RA4M1, {}},
-	{PNR_SERIES_RA4M2, {0x0100A100U, 0x0100A130U, 0x0100A180U, 0x0100A200U, 0x0100A280U, 0x0100A2C0U}, {0x0100A1C0U, 0x0100A1E0U, 0x0100A240U, 0x0100A260U}},
-	{PNR_SERIES_RA4M3, {}}, 
-	{PNR_SERIES_RA4E1, {}}, 
-	{PNR_SERIES_RA4E2, {}},
-	{PNR_SERIES_RA4W1, {}},
-	{PNR_SERIES_RA6M1, {}},
-	{PNR_SERIES_RA6M2, {}},
-	{PNR_SERIES_RA6M4, {}},
-	{PNR_SERIES_RA6M5, {}},
-	{PNR_SERIES_RA6E1, {}},
-	{PNR_SERIES_RA6E2, {}},
-	{PNR_SERIES_RA6T1, {}},
-	{PNR_SERIES_RA6T2, {}},
+	{PNR_SERIES_RA2L1, {{0x01010010U, 4}, {0x01010018U, 28}}, {}},
+	{PNR_SERIES_RA2E1, {{0x01010010U, 4}, {0x01010018U, 28}}, {}},
+	{PNR_SERIES_RA2E2, {{0x01010010U, 4}, {0x01010018U, 28}}, {}},
+	{PNR_SERIES_RA2A1, {{0x01010008U, 4}, {0x01010010U, 4}, {0x01010018U, 28}}, {}},
+	{PNR_SERIES_RA4M1, {{0x01010008U, 4}, {0x01010010U, 4}, {0x01010018U, 28}}, {}},
+	{PNR_SERIES_RA4M2, {{0x0100a100U, 4}, {0x0100a130U, 4}, {0x0100a180U, 4}, {0x0100a200U, 4}, {0x0100a280U, 4}, {0x0100a2c0U, 4}}, {{0x0100a1c0U, 4}, {0x0100a1e0U, 4}, {0x0100a240U, 4}, {0x0100a260U, 4}}},
+	{PNR_SERIES_RA4M3, {{0x0100a100U, 4}, {0x0100a180U, 4}, {0x0100a190U, 4}, {0x0100a200U, 4}, {0x0100a210U, 4}, {0x0100a280U, 4}, {0x0100a290U, 4}, {0x0100a2c0U, 4}}, {{0x0100a130U, 4}, {0x0100a1c0U, 4}, {0x0100a1e0U, 4}, {0x0100a240U, 4}, {0x0100a260U, 4}}},
+	{PNR_SERIES_RA4E1, {{0x0100a100U, 4}, {0x0100a130U, 4}, {0x0100a180U, 4}, {0x0100a200U, 4}, {0x0100a280U, 4}, {0x0100a2c0U, 4}}, {{0x0100a1c0U, 4}, {0x0100a1e0U, 4}, {0x0100a240U, 4}, {0x0100a260U, 4}}},
+	{PNR_SERIES_RA4E2, {{0x0100a100U, 4}, {0x0100a120U, 4}, {0x0100a200U, 4}}, {{0x0100a130U, 4}, {0x0100a240U, 4}, {0x0100a260U, 4}}},
+	{PNR_SERIES_RA4W1, {{0x01010008U, 4}, {0x01010010U, 4}, {0x01010018U, 28}}, {}},
+	{PNR_SERIES_RA6M1, {}, {{0x0100a150U, 13}, {0x0100a164U, 4}}},
+	{PNR_SERIES_RA6M2, {}, {{0x0100a150U, 13}, {0x0100a164U, 4}}},
+	{PNR_SERIES_RA6M3, {}, {{0x0100a150U, 13}, {0x0100a164U, 4}}},
+	{PNR_SERIES_RA6M4, {{0x0100a100U, 4}, {0x0100a110U, 4}, {0x0100a180U, 4}, {0x0100a190U, 4}, {0x0100a200U, 4}, {0x0100a210U, 4}, {0x0100a280U, 4}, {0x0100a290U, 4}, {0x0100a2c0U, 4}}, {{0x0100a130U, 4}, {0x0100a1c0U, 4}, {0x0100a1e0U, 4}, {0x0100a240U, 4}, {0x0100a260U, 4}}},
+	{PNR_SERIES_RA6M5, {{0x0100a100U, 4}, {0x0100a110U, 4}, {0x0100a180U, 4}, {0x0100a190U, 4}, {0x0100a200U, 4}, {0x0100a210U, 4}, {0x0100a280U, 4}, {0x0100a290U, 4}, {0x0100a2c0U, 4}}, {{0x0100a130U, 4}, {0x0100a1c0U, 4}, {0x0100a1e0U, 4}, {0x0100a240U, 4}, {0x0100a260U, 4}}},
+	{PNR_SERIES_RA6E1, {{0x0100a100U, 4}, {0x0100a110U, 4}, {0x0100a180U, 4}, {0x0100a190U, 4}, {0x0100a200U, 4}, {0x0100a210U, 4}, {0x0100a280U, 4}, {0x0100a290U, 4}, {0x0100a2c0U, 4}}, {{0x0100a130U, 4}, {0x0100a1c0U, 4}, {0x0100a1e0U, 4}, {0x0100a240U, 4}, {0x0100a260U, 4}}},
+	{PNR_SERIES_RA6E2, {{0x0100a100U, 4}, {0x0100a120U, 4}, {0x0100a200U, 4}}, {{0x0100a130, 4}, {0x0100a240, 4}, {0x0100a260, 4}}},
+	{PNR_SERIES_RA6T1, {}, {{0x0100a150U, 13}, {0x0100a164U, 4}}},
+	{PNR_SERIES_RA6T2, {{0x0100a100U, 4}, {0x0100a130U, 4}, {0x0100a180U, 4}, {0x0100a200U, 4}, {0x0100a280U, 4}, {0x0100a2c0U, 4}}, {{0x0100a1c0U, 4}, {0x0100a1e0U, 4}, {0x0100a240U, 4}, {0x0100a260U, 4}}},
 };
 
 /* Code flash memory size */
@@ -290,10 +295,6 @@ typedef enum {
 #define FENTRYR_PE_CF      (1U)
 #define FENTRYR_PE_DF      (1U << 7U)
 
-/* Option-Setting Flash memory for RA4 and RA6, RA2 is different */
-#define RENESAS_OF_START UINT32_C(0x0100A100) /* Start of Option-Setting for RA4 and RA6 Family */
-#define RENESAS_OF_SIZE UINT32_C(0x200) /* Size of Option-Setting area */
-
 /* Renesas RA MCUs can have one of two kinds of flash memory, MF3/4 and RV40 */
 
 #define RENESAS_CF_END UINT32_C(0x00200000) /* End of Flash (maximum possible across families) */
@@ -324,7 +325,6 @@ typedef enum {
 #define RV40_DF_BLOCK_SIZE         (0x40U)
 #define RV40_CF_WRITE_SIZE         (0x80U)
 #define RV40_DF_WRITE_SIZE         (0x4U)
-#define RV40_OF_WRITE_SIZE         (0x10U) /* as stated in Table 44.1 of RA4M2 User's Manual */
 
 /* RV40 Flash Commands */
 #define RV40_CMD               UINT32_C(0x407e0000)
@@ -698,7 +698,7 @@ static bool renesas_rv40_flash_write(target_flash_s *f, target_addr_t dest, cons
 		 */
 		platform_timeout_s timeout;
 		/* 200ms is arbitrary number i made up */
-		platform_timeout_set(&timeout, option_flash ? 200: 20);
+		platform_timeout_set(&timeout, option_flash ? 200 : 20);
 
 		/* write one chunk */
 		for (size_t i = 0U; i < (write_size / 2U); i++) {
@@ -742,8 +742,7 @@ static void renesas_add_rv40_flash(target_s *t, target_addr_t addr, size_t lengt
 	if (RENESAS_OF_START <= addr && addr <= (RENESAS_OF_START + RENESAS_OF_SIZE)) {
 		f->blocksize = RV40_DF_BLOCK_SIZE;
 		f->writesize = RV40_OF_WRITE_SIZE;
-	} else
-	if (code_flash) {
+	} else if (code_flash) {
 		f->blocksize = RV40_CF_REGION1_BLOCK_SIZE;
 		f->writesize = RV40_CF_WRITE_SIZE;
 	} else {
@@ -907,89 +906,35 @@ bool renesas_probe(target_s *t)
 	t->target_storage = (void *)priv_storage;
 	t->driver = (char *)priv_storage->pnr;
 
-	switch (priv_storage->series) {
-	case PNR_SERIES_RA2L1:
-	case PNR_SERIES_RA2A1:
-	case PNR_SERIES_RA4M1:
-		renesas_add_flash(t, 0x40100000, 8U * 1024U); /* Data flash memory 8 KB 0x40100000 */
-		target_add_ram(t, 0x20000000, 32U * 1024U);   /* SRAM 32 KB 0x20000000 */
-		break;
+    /* Data flash */
+	if (renesas_ra_family[priv_storage->series].details.data_flash_start != NONE)
+		renesas_add_flash(t, renesas_ra_family[priv_storage->series].details.data_flash_start, renesas_ra_family[priv_storage->series].details.data_flash_end - renesas_ra_family[priv_storage->series].details.data_flash_start);
 
-	case PNR_SERIES_RA2E1:
-		renesas_add_flash(t, 0x40100000, 4U * 1024U); /* Data flash memory 4 KB 0x40100000 */
-		target_add_ram(t, 0x20004000, 16U * 1024U);   /* SRAM 16 KB 0x20004000 */
-		break;
+    /* SRAM 0 */
+	if (renesas_ra_family[priv_storage->series].details.sram0_start != NONE)
+		target_add_ram(t, renesas_ra_family[priv_storage->series].details.sram0_start, renesas_ra_family[priv_storage->series].details.sram0_end - renesas_ra_family[priv_storage->series].details.sram0_start);
 
-	case PNR_SERIES_RA2E2:
-		renesas_add_flash(t, 0x40100000, 2U * 1024U); /* Data flash memory 2 KB 0x40100000 */
-		target_add_ram(t, 0x20004000, 8U * 1024U);    /* SRAM 8 KB 0x20004000 */
-		break;
+    /* Standby SRAM */
+	if (renesas_ra_family[priv_storage->series].details.stdby_sram_start != NONE)
+		target_add_ram(t, renesas_ra_family[priv_storage->series].details.stdby_sram_start, renesas_ra_family[priv_storage->series].details.stdby_sram_end - renesas_ra_family[priv_storage->series].details.stdby_sram_start);
 
-	case PNR_SERIES_RA4M2:
-	case PNR_SERIES_RA4M3:
-	case PNR_SERIES_RA4E1:
-		renesas_add_flash(t, RENESAS_OF_START, RENESAS_OF_SIZE); /* Option flash memory 512B 0x0100A100 */
-		renesas_add_flash(t, 0x08000000, 8U * 1024U); /* Data flash memory 8 KB 0x08000000 */
-		target_add_ram(t, 0x20000000, 128U * 1024U);  /* SRAM 128 KB 0x20000000 */
-		target_add_ram(t, 0x28000000, 1024U);         /* Standby SRAM 1 KB 0x28000000 */
-		break;
+    /* SRAM HS */
+	if (renesas_ra_family[priv_storage->series].details.sramhs_start != NONE)
+		target_add_ram(t, renesas_ra_family[priv_storage->series].details.sramhs_start, renesas_ra_family[priv_storage->series].details.sramhs_end - renesas_ra_family[priv_storage->series].details.sramhs_start);
 
-	case PNR_SERIES_RA4W1:
-		renesas_add_flash(t, 0x40100000, 8U * 1024U); /* Data flash memory 8 KB 0x40100000 */
-		target_add_ram(t, 0x20000000, 96U * 1024U);   /* SRAM 96 KB 0x20000000 */
-		break;
+    /* SRAM 1 */
+	if (renesas_ra_family[priv_storage->series].details.sram1_start != NONE)
+		target_add_ram(t, renesas_ra_family[priv_storage->series].details.sram1_start, renesas_ra_family[priv_storage->series].details.sram1_end - renesas_ra_family[priv_storage->series].details.sram1_start);
 
-	case PNR_SERIES_RA6M1:
-		/* conflicting information in the datasheet, here be dragons */
-		renesas_add_flash(t, 0x40100000, 8U * 1024U); /* Data flash memory 8 KB 0x40100000 */
-		target_add_ram(t, 0x20000000, 128U * 1024U);  /* SRAM 128 KB 0x20000000 */
-		target_add_ram(t, 0x1ffe0000, 128U * 1024U);  /* SRAMHS 128 KB 0x1ffe0000 */
-		target_add_ram(t, 0x200fe000, 8U * 1024U);    /* Standby SRAM 8 KB 0x200fe000 */
-		break;
+    /* Option-Setting flash */
+	if (renesas_ra_family[priv_storage->series].details.option_start != NONE)
+		target_add_ram(t, renesas_ra_family[priv_storage->series].details.option_start, renesas_ra_family[priv_storage->series].details.option_size);
 
-	case PNR_SERIES_RA6M2:
-		renesas_add_flash(t, 0x40100000, 32U * 1024U); /* Data flash memory 32 KB 0x40100000 */
-		target_add_ram(t, 0x20000000, 256U * 1024U);   /* SRAM 256 KB 0x20000000 */
-		target_add_ram(t, 0x1ffe0000, 128U * 1024U);   /* SRAMHS 128 KB 0x1ffe0000 */
-		target_add_ram(t, 0x200fe000, 8U * 1024U);     /* Standby SRAM 8 KB 0x200fe000 */
-		break;
+    /* Option-Setting 2 flash */
+	if (renesas_ra_family[priv_storage->series].details.option_start_2 != NONE)
+		target_add_ram(t, renesas_ra_family[priv_storage->series].details.option_start_2, renesas_ra_family[priv_storage->series].details.option_size_2);
 
-	case PNR_SERIES_RA6M3:
-		renesas_add_flash(t, 0x40100000, 64U * 1024U); /* Data flash memory 64 KB 0x40100000 */
-		target_add_ram(t, 0x20000000, 256U * 1024U);   /* SRAM0 256 KB 0x20000000 */
-		target_add_ram(t, 0x20040000, 256U * 1024U);   /* SRAM1 256 KB 0x20040000 */
-		target_add_ram(t, 0x1ffe0000, 128U * 1024U);   /* SRAMHS 128 KB 0x1ffe0000 */
-		target_add_ram(t, 0x200fe000, 8U * 1024U);     /* Standby SRAM 8 KB 0x200fe000 */
-		break;
-
-	case PNR_SERIES_RA6M4:
-	case PNR_SERIES_RA6E1:
-		renesas_add_flash(t, 0x08000000, 8U * 1024U); /* Data flash memory 8 KB 0x08000000 */
-		target_add_ram(t, 0x20000000, 256U * 1024U);  /* SRAM 256 KB 0x20000000 */
-		target_add_ram(t, 0x28000000, 1024U);         /* Standby SRAM 1 KB 0x28000000 */
-		break;
-
-	case PNR_SERIES_RA6M5:
-		renesas_add_flash(t, 0x08000000, 8U * 1024U); /* Data flash memory 8 KB 0x08000000 */
-		target_add_ram(t, 0x20000000, 512U * 1024U);  /* SRAM 512 KB 0x20000000 */
-		target_add_ram(t, 0x28000000, 1024U);         /* Standby SRAM 1 KB 0x28000000 */
-		break;
-
-	case PNR_SERIES_RA6T1:
-		renesas_add_flash(t, 0x40100000, 8U * 1024U); /* Data flash memory 8 KB 0x40100000 */
-		target_add_ram(t, 0x1ffe0000, 64U * 1024U);   /* SRAMHS 64 KB 0x1ffe0000 */
-		break;
-
-	case PNR_SERIES_RA6T2:
-		renesas_add_flash(t, 0x08000000, 16U * 1024U); /* Data flash memory 16 KB 0x08000000 */
-		target_add_ram(t, 0x20000000, 64U * 1024U);    /* SRAM 64 KB 0x20000000 */
-		target_add_ram(t, 0x28000000, 1024U);          /* Standby SRAM 1 KB 0x28000000 */
-		break;
-
-	default:
-		return false;
-	}
-
+    /* Code flash */
 	renesas_add_flash(t, 0x00000000, renesas_flash_size(pnr)); /* Code flash memory 0x00000000 */
 
 	target_add_commands(t, renesas_cmd_list, t->driver);
