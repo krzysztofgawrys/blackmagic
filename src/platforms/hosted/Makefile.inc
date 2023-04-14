@@ -2,7 +2,7 @@ ifeq ($(origin CC),default)
     CC := gcc
 endif
 SYS := $(shell $(CC) -dumpmachine)
-CFLAGS += -DENABLE_DEBUG -DPLATFORM_HAS_DEBUG
+CFLAGS += -DENABLE_DEBUG -DPLATFORM_HAS_DEBUG -fno-stack-protector -g
 CFLAGS +=-I ./target
 
 # Clang requires some special handling here: -gnu means MinGW

@@ -134,6 +134,9 @@ bool target_flash_erase(target_s *t, target_addr_t addr, size_t len)
 			return false;
 		}
 
+		if (f->erase == NULL) /* Target is not implementing flash erase function */
+			return true;
+
 		/* Terminate flash operations if we're not in the same target flash */
 		if (f != active_flash) {
 			ret &= flash_done(active_flash);
